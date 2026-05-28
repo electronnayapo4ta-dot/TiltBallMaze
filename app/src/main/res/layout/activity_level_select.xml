@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/menu_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Select Level"
+            android:textSize="32sp"
+            android:textColor="@color/menu_title"
+            android:fontFamily="sans-serif-black"
+            android:layout_marginBottom="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/level1"
+            style="@style/LevelButton"
+            android:text="Level 1"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical|start" />
+
+        <Button
+            android:id="@+id/level2"
+            style="@style/LevelButton"
+            android:text="Level 2"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical|start"
+            android:layout_marginTop="16dp"/>
+
+        <Button
+            android:id="@+id/level3"
+            style="@style/LevelButton"
+            android:text="Level 3"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical|start"
+            android:layout_marginTop="16dp"/>
+
+        <Button
+            android:id="@+id/level4"
+            style="@style/LevelButton"
+            android:text="Level 4"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical|start"
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+</ScrollView>

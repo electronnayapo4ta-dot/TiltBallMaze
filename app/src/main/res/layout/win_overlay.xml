@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/winOverlay"
+    android:background="#AA000000"
+    android:visibility="gone"
+    android:clickable="true"
+    android:focusable="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.yourcompany.tiltballmaze.game.ui.FireworksView
+        android:id="@+id/fireworks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/winText"
+            android:text="YOU WIN!"
+            android:textSize="48sp"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/montserrat_bold"
+            android:layout_marginBottom="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnRestart"
+            style="@style/GameButton"
+            android:text="Restart" />
+
+        <Button
+            android:id="@+id/btnNextLevel"
+            style="@style/GameButton"
+            android:text="Next Level"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+
+</FrameLayout>
+

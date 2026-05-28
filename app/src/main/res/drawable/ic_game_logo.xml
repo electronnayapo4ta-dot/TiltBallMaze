@@ -1,0 +1,28 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="220dp"
+    android:height="220dp"
+    android:viewportWidth="220"
+    android:viewportHeight="220">
+    <!-- outer ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#F2AA4C"
+        android:strokeWidth="10"
+        android:pathData="M110,15a95,95 0,1 1,-0.1,0z" />
+
+    <!-- maze lines -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#80FFFFFF"
+        android:strokeWidth="8"
+        android:strokeLineCap="round"
+        android:pathData="M55,70h110M55,110h70M55,150h110M85,70v80M135,70v40M165,110v40" />
+
+    <!-- ball -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M165,70m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0" />
+    <path
+        android:fillColor="#40FFFFFF"
+        android:pathData="M157,63c6,-7 18,-6 22,2c-6,-3 -14,-3 -22,-2z" />
+</vector>

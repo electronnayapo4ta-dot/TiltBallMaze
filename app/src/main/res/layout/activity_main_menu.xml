@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/menu_background"
+    android:padding="32dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:src="@drawable/ic_game_logo"
+        android:contentDescription="@string/app_name"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:text="Tilt Ball Maze"
+        android:textSize="28sp"
+        android:textColor="@color/menu_title"
+        android:fontFamily="@font/montserrat_bold"
+        android:layout_marginBottom="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnPlay"
+        style="@style/GameButton"
+        android:text="Play"/>
+
+    <Button
+        android:id="@+id/btnSettings"
+        style="@style/GameButton"
+        android:text="Settings"
+        android:layout_marginTop="24dp"/>
+
+    <Button
+        android:id="@+id/btnExit"
+        style="@style/GameButton"
+        android:text="Exit"
+        android:layout_marginTop="24dp"/>
+
+</LinearLayout>
