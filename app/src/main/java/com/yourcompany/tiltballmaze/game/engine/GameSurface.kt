@@ -14,6 +14,8 @@ import com.yourcompany.tiltballmaze.game.model.Hole
 import com.yourcompany.tiltballmaze.game.model.MovingObstacle
 import com.yourcompany.tiltballmaze.game.model.Obstacle
 import com.yourcompany.tiltballmaze.game.model.RotatingObstacle
+import com.yourcompany.tiltballmaze.game.model.VerticalPairObstacle
+import com.yourcompany.tiltballmaze.ui.dev.DevSettingsActivity
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -48,6 +50,12 @@ class GameSurface @JvmOverloads constructor(
     private val movingObstacles = mutableListOf<MovingObstacle>()
     private val movingPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.MAGENTA
+        style = Paint.Style.FILL
+    }
+
+    private val verticalPairs = mutableListOf<VerticalPairObstacle>()
+    private val deadlyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.RED
         style = Paint.Style.FILL
     }
 
@@ -100,6 +108,10 @@ class GameSurface @JvmOverloads constructor(
 
     fun setLevel(levelId: Int) {
         this.levelId = levelId
+        // If surface is already created, apply immediately; otherwise surfaceCreated() will call resetLevel().
+        if (widthF > 0f && heightF > 0f) {
+            resetLevel()
+        }
     }
 
     fun setTilt(ax: Float, ay: Float) {
@@ -133,12 +145,14 @@ class GameSurface @JvmOverloads constructor(
         obstacles.clear()
         movingObstacles.clear()
         rotatingObstacles.clear()
+        verticalPairs.clear()
 
         when (levelId) {
             1 -> loadLevel1()
             2 -> loadLevel2()
             3 -> loadLevel3()
             4 -> loadLevel4()
+            5 -> loadLevel5()
             else -> loadLevel1()
         }
 
@@ -261,6 +275,89 @@ class GameSurface @JvmOverloads constructor(
         )
     }
 
+    private fun loadLevel5() {
+        obstacles.clear()
+        verticalPairs.clear()
+        movingObstacles.clear()
+        rotatingObstacles.clear()
+
+        val d = ball.radius * 2f
+        val gapBetweenHoriz = d * 3.5f      // вертикальный проход между горизонтальными
+        val gapBetweenVerticals = d * 3.2f  // расстояние между вертикальными шторками
+
+        val shutterHeight = heightF * 0.05f
+
+        val centerY = heightF * 0.5f
+        val topShutterBottom = centerY - gapBetweenHoriz / 2f
+        val bottomShutterTop = centerY + gapBetweenHoriz / 2f
+
+        // верхняя горизонтальная шторка (слева к стене)
+        val topShutterRight = widthF * 0.7f
+        obstacles += Obstacle(
+            left = 0f,
+            top = topShutterBottom - shutterHeight,
+            right = topShutterRight,
+            bottom = topShutterBottom
+        )
+
+        // нижняя горизонтальная шторка (слева к стене)
+        val bottomShutterWidth = widthF * 0.7f
+        obstacles += Obstacle(
+            left = widthF - bottomShutterWidth,
+            top = bottomShutterTop,
+            right = widthF,
+            bottom = bottomShutterTop + shutterHeight
+        )
+
+        // вертикальные шторки — так, чтобы сбоку НЕ было прохода
+        val pairCenterX = widthF * 0.6f
+        val halfGap = gapBetweenVerticals / 2f
+        val verticalWidth = d * 0.9f
+
+        val left1 = pairCenterX - halfGap - verticalWidth
+        val right1 = pairCenterX - halfGap
+        val left2 = pairCenterX + halfGap
+        val right2 = pairCenterX + halfGap + verticalWidth
+
+        val verticalTop = topShutterBottom
+        val verticalBottom = bottomShutterTop
+
+        // Хотим движение строго "от стенки до стенки" без зазора по бокам:
+        // на левом пределе left1 == 0, на правом пределе right2 == widthF.
+        val minX = 0f
+        val maxX = widthF
+
+        val speedMultiplier = DevSettingsActivity.level5SpeedMultiplier(context)
+
+        verticalPairs += VerticalPairObstacle(
+            left1 = left1,
+            top1 = verticalTop,
+            right1 = right1,
+            bottom1 = verticalBottom,
+
+            left2 = left2,
+            top2 = verticalTop,
+            right2 = right2,
+            bottom2 = verticalBottom,
+
+            minX = minX,
+            maxX = maxX,
+            speed = DevSettingsActivity.BASE_VERTICAL_SPEED * speedMultiplier,
+            direction = -1
+        )
+
+        // шарик снизу
+        ball.x = widthF * 0.2f
+        ball.y = heightF * 0.85f
+
+        // лунка сверху
+        hole = Hole(
+            x = widthF * 0.8f,
+            y = heightF * 0.15f,
+            radius = 50f
+        )
+    }
+
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
         widthF = width.toFloat()
         heightF = height.toFloat()
@@ -307,9 +404,43 @@ class GameSurface @JvmOverloads constructor(
         updateRotatingObstacles(dt)
         handleRotatingObstacleCollisions()
 
+        updateVerticalPairs(dt)
+        handleVerticalPairCollisions()
+
         if (checkWin()) {
             isWin = true
             onWin()
+        }
+    }
+
+    private fun updateVerticalPairs(dt: Float) {
+        for (p in verticalPairs) {
+            val dx = p.speed * dt * p.direction
+
+            p.left1 += dx
+            p.right1 += dx
+            p.left2 += dx
+            p.right2 += dx
+
+            // Разворот строго в пределах диапазона, с отражением "перелёта" (как у MovingObstacle),
+            // чтобы не оставлять зазор у стенок из-за накопления ошибки.
+            if (p.left1 < p.minX) {
+                val overshoot = p.minX - p.left1
+                val shift = 2f * overshoot
+                p.left1 += shift
+                p.right1 += shift
+                p.left2 += shift
+                p.right2 += shift
+                p.direction = 1
+            } else if (p.right2 > p.maxX) {
+                val overshoot = p.right2 - p.maxX
+                val shift = -2f * overshoot
+                p.left1 += shift
+                p.right1 += shift
+                p.left2 += shift
+                p.right2 += shift
+                p.direction = -1
+            }
         }
     }
 
@@ -390,6 +521,32 @@ class GameSurface @JvmOverloads constructor(
                     ball.vy -= (1f + bounce) * vn * ny
                     SoundManager.playCollision() // звук при столкновении
                 }
+            }
+        }
+    }
+
+    private fun rectCircleOverlap(
+        cx: Float, cy: Float, r: Float,
+        left: Float, top: Float, right: Float, bottom: Float
+    ): Boolean {
+        val closestX = cx.coerceIn(left, right)
+        val closestY = cy.coerceIn(top, bottom)
+        val dx = cx - closestX
+        val dy = cy - closestY
+        return dx * dx + dy * dy < r * r
+    }
+
+    private fun handleVerticalPairCollisions() {
+        for (p in verticalPairs) {
+            val hit =
+                rectCircleOverlap(ball.x, ball.y, ball.radius, p.left1, p.top1, p.right1, p.bottom1) ||
+                    rectCircleOverlap(ball.x, ball.y, ball.radius, p.left2, p.top2, p.right2, p.bottom2)
+
+            if (hit) {
+                // взрыв + рестарт уровня
+                SoundManager.playExplosion()
+                restartLevel()
+                return
             }
         }
     }
@@ -547,6 +704,11 @@ class GameSurface @JvmOverloads constructor(
 
             for (m in movingObstacles) {
                 canvas.drawRect(m.left, m.top, m.right, m.bottom, movingPaint)
+            }
+
+            for (p in verticalPairs) {
+                canvas.drawRect(p.left1, p.top1, p.right1, p.bottom1, deadlyPaint)
+                canvas.drawRect(p.left2, p.top2, p.right2, p.bottom2, deadlyPaint)
             }
 
             for (r in rotatingObstacles) {

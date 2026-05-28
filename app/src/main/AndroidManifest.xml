@@ -28,6 +28,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.dev.DevSettingsActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".game.ui.GameActivity"
             android:exported="false" />
 
