@@ -108,7 +108,6 @@ class GameSurface @JvmOverloads constructor(
 
     fun setLevel(levelId: Int) {
         this.levelId = levelId
-        // If surface is already created, apply immediately; otherwise surfaceCreated() will call resetLevel().
         if (widthF > 0f && heightF > 0f) {
             resetLevel()
         }
@@ -167,18 +166,13 @@ class GameSurface @JvmOverloads constructor(
     }
 
     private fun loadLevel2() {
-        obstacles.clear()
-        movingObstacles.clear()
-        rotatingObstacles.clear()
-
         val shutterHeight = heightF * 0.05f
         val topY = heightF * 0.3f
         val bottomY = heightF * 0.6f
         
-        val narrowWidth = widthF * 0.5f // Increased from 0.3f
+        val narrowWidth = widthF * 0.5f
         val wideWidth = widthF * 0.7f
 
-        // Top obstacle: narrow, normal speed, starts from left
         movingObstacles += MovingObstacle(
             left = 0f,
             top = topY,
@@ -186,11 +180,10 @@ class GameSurface @JvmOverloads constructor(
             bottom = topY + shutterHeight,
             minX = 0f,
             maxX = widthF,
-            speed = 850f, // Increased from 350f
+            speed = 850f,
             direction = 1
         )
 
-        // Bottom obstacle: wider, higher speed, starts from right
         movingObstacles += MovingObstacle(
             left = widthF - wideWidth,
             top = bottomY,
@@ -198,7 +191,7 @@ class GameSurface @JvmOverloads constructor(
             bottom = bottomY + shutterHeight,
             minX = 0f,
             maxX = widthF,
-            speed = 450f, // Reduced from 550f
+            speed = 450f,
             direction = -1
         )
 
@@ -213,23 +206,16 @@ class GameSurface @JvmOverloads constructor(
     }
 
     private fun loadLevel3() {
-        // Rotating fan-like obstacle
         rotatingObstacles += RotatingObstacle(
             centerX = widthF / 2f,
             centerY = heightF / 2f,
             width = widthF,
             height = 40f,
-            rotationSpeed = 90f // 90 degrees per second
+            rotationSpeed = 90f
         )
-
         ball.x = widthF * 0.5f
         ball.y = heightF * 0.85f
-
-        hole = Hole(
-            x = widthF * 0.5f,
-            y = heightF * 0.15f,
-            radius = 50f
-        )
+        hole = Hole(x = widthF * 0.5f, y = heightF * 0.15f, radius = 50f)
     }
 
     private fun loadLevel4() {
@@ -240,8 +226,6 @@ class GameSurface @JvmOverloads constructor(
         val bottomY = topY + shutterHeight + gap
         val minX = 0f
         val maxX = widthF
-
-        val leftMaxLimit = maxX - shutterWidth
 
         movingObstacles += MovingObstacle(
             left = 0f,
@@ -255,7 +239,7 @@ class GameSurface @JvmOverloads constructor(
         )
 
         movingObstacles += MovingObstacle(
-            left = leftMaxLimit,
+            left = maxX - shutterWidth,
             top = bottomY,
             right = maxX,
             bottom = bottomY + shutterHeight,
@@ -267,95 +251,44 @@ class GameSurface @JvmOverloads constructor(
 
         ball.x = widthF * 0.5f
         ball.y = heightF * 0.85f
-
-        hole = Hole(
-            x = widthF * 0.5f,
-            y = heightF * 0.1f,
-            radius = 50f
-        )
+        hole = Hole(x = widthF * 0.5f, y = heightF * 0.1f, radius = 50f)
     }
 
     private fun loadLevel5() {
-        obstacles.clear()
-        verticalPairs.clear()
-        movingObstacles.clear()
-        rotatingObstacles.clear()
-
         val d = ball.radius * 2f
-        val gapBetweenHoriz = d * 3.5f      // вертикальный проход между горизонтальными
-        val gapBetweenVerticals = d * 3.2f  // расстояние между вертикальными шторками
+        val gapBetweenHoriz = d * 3.5f
+        val gapBetweenVerticals = d * 5.0f // 1.5x wider than 3.2f
 
         val shutterHeight = heightF * 0.05f
-
         val centerY = heightF * 0.5f
         val topShutterBottom = centerY - gapBetweenHoriz / 2f
         val bottomShutterTop = centerY + gapBetweenHoriz / 2f
 
-        // верхняя горизонтальная шторка (слева к стене)
-        val topShutterRight = widthF * 0.7f
-        obstacles += Obstacle(
-            left = 0f,
-            top = topShutterBottom - shutterHeight,
-            right = topShutterRight,
-            bottom = topShutterBottom
-        )
+        obstacles += Obstacle(0f, topShutterBottom - shutterHeight, widthF * 0.7f, topShutterBottom)
+        obstacles += Obstacle(widthF * 0.3f, bottomShutterTop, widthF, bottomShutterTop + shutterHeight)
 
-        // нижняя горизонтальная шторка (слева к стене)
-        val bottomShutterWidth = widthF * 0.7f
-        obstacles += Obstacle(
-            left = widthF - bottomShutterWidth,
-            top = bottomShutterTop,
-            right = widthF,
-            bottom = bottomShutterTop + shutterHeight
-        )
-
-        // вертикальные шторки — так, чтобы сбоку НЕ было прохода
         val pairCenterX = widthF * 0.6f
         val halfGap = gapBetweenVerticals / 2f
         val verticalWidth = d * 0.9f
 
-        val left1 = pairCenterX - halfGap - verticalWidth
-        val right1 = pairCenterX - halfGap
-        val left2 = pairCenterX + halfGap
-        val right2 = pairCenterX + halfGap + verticalWidth
-
-        val verticalTop = topShutterBottom
-        val verticalBottom = bottomShutterTop
-
-        // Хотим движение строго "от стенки до стенки" без зазора по бокам:
-        // на левом пределе left1 == 0, на правом пределе right2 == widthF.
-        val minX = 0f
-        val maxX = widthF
-
-        val speedMultiplier = DevSettingsActivity.level5SpeedMultiplier(context)
-
         verticalPairs += VerticalPairObstacle(
-            left1 = left1,
-            top1 = verticalTop,
-            right1 = right1,
-            bottom1 = verticalBottom,
-
-            left2 = left2,
-            top2 = verticalTop,
-            right2 = right2,
-            bottom2 = verticalBottom,
-
-            minX = minX,
-            maxX = maxX,
-            speed = DevSettingsActivity.BASE_VERTICAL_SPEED * speedMultiplier,
+            left1 = pairCenterX - halfGap - verticalWidth,
+            top1 = topShutterBottom,
+            right1 = pairCenterX - halfGap,
+            bottom1 = bottomShutterTop,
+            left2 = pairCenterX + halfGap,
+            top2 = topShutterBottom,
+            right2 = pairCenterX + halfGap + verticalWidth,
+            bottom2 = bottomShutterTop,
+            minX = 0f,
+            maxX = widthF,
+            speed = DevSettingsActivity.BASE_VERTICAL_SPEED * DevSettingsActivity.level5SpeedMultiplier(context),
             direction = -1
         )
 
-        // шарик снизу
         ball.x = widthF * 0.2f
         ball.y = heightF * 0.85f
-
-        // лунка сверху
-        hole = Hole(
-            x = widthF * 0.8f,
-            y = heightF * 0.15f,
-            radius = 50f
-        )
+        hole = Hole(widthF * 0.8f, heightF * 0.15f, 50f)
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
@@ -378,9 +311,7 @@ class GameSurface @JvmOverloads constructor(
 
         if (isExploding) {
             explosionTimer += dt
-            if (explosionTimer > 1.0f) {
-                resetLevel()
-            }
+            if (explosionTimer > 1.0f) resetLevel()
             return
         }
 
@@ -396,51 +327,17 @@ class GameSurface @JvmOverloads constructor(
         ball.y += ball.vy * dt
 
         checkBoundaries()
-
         handleObstacleCollisions()
         updateMovingObstacles(dt)
         handleMovingObstacleCollisions()
-        
         updateRotatingObstacles(dt)
         handleRotatingObstacleCollisions()
-
         updateVerticalPairs(dt)
         handleVerticalPairCollisions()
 
         if (checkWin()) {
             isWin = true
             onWin()
-        }
-    }
-
-    private fun updateVerticalPairs(dt: Float) {
-        for (p in verticalPairs) {
-            val dx = p.speed * dt * p.direction
-
-            p.left1 += dx
-            p.right1 += dx
-            p.left2 += dx
-            p.right2 += dx
-
-            // Разворот строго в пределах диапазона, с отражением "перелёта" (как у MovingObstacle),
-            // чтобы не оставлять зазор у стенок из-за накопления ошибки.
-            if (p.left1 < p.minX) {
-                val overshoot = p.minX - p.left1
-                val shift = 2f * overshoot
-                p.left1 += shift
-                p.right1 += shift
-                p.left2 += shift
-                p.right2 += shift
-                p.direction = 1
-            } else if (p.right2 > p.maxX) {
-                val overshoot = p.right2 - p.maxX
-                val shift = -2f * overshoot
-                p.left1 += shift
-                p.right1 += shift
-                p.left2 += shift
-                p.right2 += shift
-                p.direction = -1
-            }
         }
     }
 
@@ -452,7 +349,6 @@ class GameSurface @JvmOverloads constructor(
             ball.x = widthF - ball.radius
             ball.vx = -ball.vx * 0.5f
         }
-
         if (ball.y - ball.radius < 0) {
             ball.y = ball.radius
             ball.vy = -ball.vy * 0.5f
@@ -483,18 +379,10 @@ class GameSurface @JvmOverloads constructor(
         }
     }
 
-    private fun updateRotatingObstacles(dt: Float) {
-        for (r in rotatingObstacles) {
-            r.angle += r.rotationSpeed * dt
-            if (r.angle >= 360f) r.angle -= 360f
-        }
-    }
-
     private fun handleMovingObstacleCollisions() {
         for (m in movingObstacles) {
             val closestX = ball.x.coerceIn(m.left, m.right)
             val closestY = ball.y.coerceIn(m.top, m.bottom)
-
             val dx = ball.x - closestX
             val dy = ball.y - closestY
             val dist2 = dx * dx + dy * dy
@@ -502,7 +390,6 @@ class GameSurface @JvmOverloads constructor(
             if (dist2 < ball.radius * ball.radius) {
                 val dist = sqrt(dist2.toDouble()).toFloat().coerceAtLeast(0.001f)
                 val overlap = ball.radius - dist
-
                 val nx = dx / dist
                 val ny = dy / dist
 
@@ -514,40 +401,26 @@ class GameSurface @JvmOverloads constructor(
                     return
                 }
 
-                val vn = ball.vx * nx + ball.vy * ny
-                if (vn < 0f) {
+                val obsVx = m.speed * m.direction
+                val relVx = ball.vx - obsVx
+                val relVy = ball.vy
+                val vnRel = relVx * nx + relVy * ny
+
+                if (vnRel < 0f) {
                     val bounce = 0.5f
-                    ball.vx -= (1f + bounce) * vn * nx
-                    ball.vy -= (1f + bounce) * vn * ny
-                    SoundManager.playCollision() // звук при столкновении
+                    val impulse = -(1f + bounce) * vnRel
+                    ball.vx += impulse * nx
+                    ball.vy += impulse * ny
+                    SoundManager.playCollision()
                 }
             }
         }
     }
 
-    private fun rectCircleOverlap(
-        cx: Float, cy: Float, r: Float,
-        left: Float, top: Float, right: Float, bottom: Float
-    ): Boolean {
-        val closestX = cx.coerceIn(left, right)
-        val closestY = cy.coerceIn(top, bottom)
-        val dx = cx - closestX
-        val dy = cy - closestY
-        return dx * dx + dy * dy < r * r
-    }
-
-    private fun handleVerticalPairCollisions() {
-        for (p in verticalPairs) {
-            val hit =
-                rectCircleOverlap(ball.x, ball.y, ball.radius, p.left1, p.top1, p.right1, p.bottom1) ||
-                    rectCircleOverlap(ball.x, ball.y, ball.radius, p.left2, p.top2, p.right2, p.bottom2)
-
-            if (hit) {
-                // взрыв + рестарт уровня
-                SoundManager.playExplosion()
-                restartLevel()
-                return
-            }
+    private fun updateRotatingObstacles(dt: Float) {
+        for (r in rotatingObstacles) {
+            r.angle += r.rotationSpeed * dt
+            if (r.angle >= 360f) r.angle -= 360f
         }
     }
 
@@ -557,31 +430,26 @@ class GameSurface @JvmOverloads constructor(
             val cosA = cos(rad).toFloat()
             val sinA = sin(rad).toFloat()
 
-            // Transform ball position to rectangle's local coordinate system
             val relX = ball.x - r.centerX
             val relY = ball.y - r.centerY
-            
             val localX = relX * cosA + relY * sinA
             val localY = -relX * sinA + relY * cosA
 
             val halfW = r.width / 2f
             val halfH = r.height / 2f
-
             val closestX = localX.coerceIn(-halfW, halfW)
             val closestY = localY.coerceIn(-halfH, halfH)
 
-            val dx = localX - closestX
-            val dy = localY - closestY
-            val dist2 = dx * dx + dy * dy
+            val ldx = localX - closestX
+            val ldy = localY - closestY
+            val dist2 = ldx * ldx + ldy * ldy
 
             if (dist2 < ball.radius * ball.radius) {
                 val dist = sqrt(dist2.toDouble()).toFloat().coerceAtLeast(0.001f)
                 val overlap = ball.radius - dist
+                val nxLocal = ldx / dist
+                val nyLocal = ldy / dist
 
-                val nxLocal = dx / dist
-                val nyLocal = dy / dist
-
-                // Transform normal back to world space
                 val nx = nxLocal * cosA - nyLocal * sinA
                 val ny = nxLocal * sinA + nyLocal * cosA
 
@@ -593,32 +461,74 @@ class GameSurface @JvmOverloads constructor(
                     return
                 }
 
-                val vn = ball.vx * nx + ball.vy * ny
-                if (vn < 0f) {
+                // Obstacle velocity at collision point (simplified)
+                val angVelRad = Math.toRadians(r.rotationSpeed.toDouble()).toFloat()
+                val obsVx = -angVelRad * relY
+                val obsVy = angVelRad * relX
+                
+                val relVx = ball.vx - obsVx
+                val relVy = ball.vy - obsVy
+                val vnRel = relVx * nx + relVy * ny
+
+                if (vnRel < 0f) {
                     val bounce = 0.5f
-                    ball.vx -= (1f + bounce) * vn * nx
-                    ball.vy -= (1f + bounce) * vn * ny
+                    val impulse = -(1f + bounce) * vnRel
+                    ball.vx += impulse * nx
+                    ball.vy += impulse * ny
+                    SoundManager.playCollision()
                 }
             }
         }
     }
 
-    private fun isPinned(): Boolean {
-        // Screen edges
-        if (ball.x - ball.radius < -1f || ball.x + ball.radius > widthF + 1f ||
-            ball.y - ball.radius < -1f || ball.y + ball.radius > heightF + 1f) {
-            return true
-        }
+    private fun updateVerticalPairs(dt: Float) {
+        for (p in verticalPairs) {
+            val dx = p.speed * dt * p.direction
+            p.left1 += dx
+            p.right1 += dx
+            p.left2 += dx
+            p.right2 += dx
 
-        // Static obstacles
-        for (o in obstacles) {
-            val closestX = ball.x.coerceIn(o.left, o.right)
-            val closestY = ball.y.coerceIn(o.top, o.bottom)
-            val dx = ball.x - closestX
-            val dy = ball.y - closestY
-            if (dx * dx + dy * dy < (ball.radius * 0.9f) * (ball.radius * 0.9f)) {
-                return true
+            if (p.left1 < p.minX) {
+                val overshoot = p.minX - p.left1
+                val shift = 2f * overshoot
+                p.left1 += shift; p.right1 += shift; p.left2 += shift; p.right2 += shift
+                p.direction = 1
+            } else if (p.right2 > p.maxX) {
+                val overshoot = p.right2 - p.maxX
+                val shift = -2f * overshoot
+                p.left1 += shift; p.right1 += shift; p.left2 += shift; p.right2 += shift
+                p.direction = -1
             }
+        }
+    }
+
+    private fun handleVerticalPairCollisions() {
+        for (p in verticalPairs) {
+            val hit = rectCircleOverlap(ball.x, ball.y, ball.radius, p.left1, p.top1, p.right1, p.bottom1) ||
+                      rectCircleOverlap(ball.x, ball.y, ball.radius, p.left2, p.top2, p.right2, p.bottom2)
+            if (hit) {
+                SoundManager.playExplosion()
+                restartLevel()
+                return
+            }
+        }
+    }
+
+    private fun rectCircleOverlap(cx: Float, cy: Float, r: Float, l: Float, t: Float, ri: Float, b: Float): Boolean {
+        val closestX = cx.coerceIn(l, ri)
+        val closestY = cy.coerceIn(t, b)
+        val dx = cx - closestX
+        val dy = cy - closestY
+        return dx * dx + dy * dy < r * r
+    }
+
+    private fun isPinned(): Boolean {
+        if (ball.x - ball.radius < -1f || ball.x + ball.radius > widthF + 1f ||
+            ball.y - ball.radius < -1f || ball.y + ball.radius > heightF + 1f) return true
+
+        for (o in obstacles) {
+            if (rectCircleOverlap(ball.x, ball.y, ball.radius * 0.9f, o.left, o.top, o.right, o.bottom)) return true
         }
         return false
     }
@@ -626,39 +536,30 @@ class GameSurface @JvmOverloads constructor(
     private fun triggerExplosion() {
         isExploding = true
         explosionTimer = 0f
-        SoundManager.playExplosion() // звук взрыва
+        SoundManager.playExplosion()
     }
 
     private fun checkWin(): Boolean {
         val dx = ball.x - hole.x
         val dy = ball.y - hole.y
-        val dist2 = dx * dx + dy * dy
-
-        return dist2 < (hole.radius - ball.radius).let { it * it }
+        return (dx * dx + dy * dy) < (hole.radius - ball.radius).let { it * it }
     }
 
     private fun onWin() {
         ball.vx = 0f
         ball.vy = 0f
-
         levelEndTime = System.currentTimeMillis()
-
         GamePreferences.setLevelCompleted(context, levelId)
-
         if (GamePreferences.isTrackTimer(context)) {
-            val time = levelEndTime - levelStartTime
-            GamePreferences.saveBestTime(context, levelId, time)
+            GamePreferences.saveBestTime(context, levelId, levelEndTime - levelStartTime)
         }
-
         if (GamePreferences.isTrackProgression(context)) {
             GamePreferences.setLevelUnlocked(context, levelId + 1)
         }
-
         if (!hasPlayedWinSound) {
             hasPlayedWinSound = true
             SoundManager.playWin()
         }
-
         onWinListener?.invoke()
     }
 
@@ -666,7 +567,6 @@ class GameSurface @JvmOverloads constructor(
         for (o in obstacles) {
             val closestX = ball.x.coerceIn(o.left, o.right)
             val closestY = ball.y.coerceIn(o.top, o.bottom)
-
             val dx = ball.x - closestX
             val dy = ball.y - closestY
             val dist2 = dx * dx + dy * dy
@@ -674,7 +574,6 @@ class GameSurface @JvmOverloads constructor(
             if (dist2 < ball.radius * ball.radius) {
                 val dist = sqrt(dist2.toDouble()).toFloat().coerceAtLeast(0.001f)
                 val overlap = ball.radius - dist
-
                 val nx = dx / dist
                 val ny = dy / dist
 
@@ -686,7 +585,7 @@ class GameSurface @JvmOverloads constructor(
                     val bounce = 0.5f
                     ball.vx -= (1f + bounce) * vn * nx
                     ball.vy -= (1f + bounce) * vn * ny
-                    SoundManager.playCollision() // звук при столкновении
+                    SoundManager.playCollision()
                 }
             }
         }
@@ -697,44 +596,25 @@ class GameSurface @JvmOverloads constructor(
         try {
             canvas.drawRect(0f, 0f, widthF, heightF, bgPaint)
             canvas.drawCircle(hole.x, hole.y, hole.radius, holePaint)
-
-            for (o in obstacles) {
-                canvas.drawRect(o.left, o.top, o.right, o.bottom, obstaclePaint)
-            }
-
-            for (m in movingObstacles) {
-                canvas.drawRect(m.left, m.top, m.right, m.bottom, movingPaint)
-            }
-
+            for (o in obstacles) canvas.drawRect(o.left, o.top, o.right, o.bottom, obstaclePaint)
+            for (m in movingObstacles) canvas.drawRect(m.left, m.top, m.right, m.bottom, movingPaint)
             for (p in verticalPairs) {
                 canvas.drawRect(p.left1, p.top1, p.right1, p.bottom1, deadlyPaint)
                 canvas.drawRect(p.left2, p.top2, p.right2, p.bottom2, deadlyPaint)
             }
-
             for (r in rotatingObstacles) {
                 canvas.save()
                 canvas.rotate(r.angle, r.centerX, r.centerY)
-                canvas.drawRect(
-                    r.centerX - r.width / 2f,
-                    r.centerY - r.height / 2f,
-                    r.centerX + r.width / 2f,
-                    r.centerY + r.height / 2f,
-                    rotatingPaint
-                )
+                canvas.drawRect(r.centerX - r.width / 2f, r.centerY - r.height / 2f, r.centerX + r.width / 2f, r.centerY + r.height / 2f, rotatingPaint)
                 canvas.restore()
             }
-
             if (isExploding) {
                 explosionPaint.color = Color.rgb(255, (255 * (1 - explosionTimer)).toInt(), 0)
                 canvas.drawCircle(ball.x, ball.y, ball.radius * (1 + explosionTimer * 3), explosionPaint)
             } else {
                 canvas.drawCircle(ball.x, ball.y, ball.radius, ballPaint)
             }
-
-            if (isWin) {
-                canvas.drawText("YOU WIN!", widthF / 2f, heightF / 2f, winTextPaint)
-            }
-
+            if (isWin) canvas.drawText("YOU WIN!", widthF / 2f, heightF / 2f, winTextPaint)
             if (!isWin && GamePreferences.isTrackTimer(context)) {
                 val elapsed = System.currentTimeMillis() - levelStartTime
                 canvas.drawText("${elapsed / 1000f}s", 50f, 100f, timerPaint)

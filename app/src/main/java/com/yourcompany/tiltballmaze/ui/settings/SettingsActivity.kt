@@ -1,6 +1,8 @@
 package com.yourcompany.tiltballmaze.ui.settings
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.yourcompany.tiltballmaze.databinding.ActivitySettingsBinding
@@ -37,6 +39,16 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.switchTimer.setOnCheckedChangeListener { _, isChecked ->
             GamePreferences.setTrackTimer(this, isChecked)
+        }
+
+        binding.tvEmail.setOnClickListener {
+            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("mailto:AVG.LOGIN@yandex.ru")
+                putExtra(Intent.EXTRA_SUBJECT, "Tilt Ball Maze Feedback")
+            }
+            try {
+                startActivity(intent)
+            } catch (_: Exception) {}
         }
     }
 }
