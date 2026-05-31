@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.yourcompany.tiltballmaze.databinding.ActivitySettingsBinding
 import com.yourcompany.tiltballmaze.game.audio.SoundManager
 import com.yourcompany.tiltballmaze.game.data.GamePreferences
+import com.yourcompany.tiltballmaze.ui.support.SupportActivity
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -39,6 +40,10 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.switchTimer.setOnCheckedChangeListener { _, isChecked ->
             GamePreferences.setTrackTimer(this, isChecked)
+        }
+
+        binding.btnSupport.setOnClickListener {
+            startActivity(Intent(this, SupportActivity::class.java))
         }
 
         binding.tvEmail.setOnClickListener {

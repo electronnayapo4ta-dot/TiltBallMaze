@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:background="@drawable/menu_background">
+
+    <LinearLayout
+        android:id="@+id/supportContainer"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Support the Developer"
+            android:textSize="32sp"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/montserrat_bold"
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:text="Tilt Ball Maze is created with passion and dedication. If you enjoy the game and want to support future updates, you can do so below. Thank you!"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:layout_marginBottom="32dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btnCoffee"
+            android:text="☕ Buy a Coffee — $1"
+            style="@style/GameButton"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btnSupport"
+            android:text="💛 Support — $3"
+            style="@style/GameButton"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btnSuperSupport"
+            android:text="🚀 Super Support — $5"
+            style="@style/GameButton"
+            android:layout_marginBottom="16dp"/>
+
+    </LinearLayout>
+</ScrollView>
