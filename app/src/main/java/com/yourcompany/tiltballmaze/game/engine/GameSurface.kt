@@ -617,7 +617,7 @@ class GameSurface @JvmOverloads constructor(
             if (isWin) canvas.drawText("YOU WIN!", widthF / 2f, heightF / 2f, winTextPaint)
             if (!isWin && GamePreferences.isTrackTimer(context)) {
                 val elapsed = System.currentTimeMillis() - levelStartTime
-                canvas.drawText("${elapsed / 1000f}s", 50f, 100f, timerPaint)
+                canvas.drawText("${elapsed / 1000f}s", 50f, 200f, timerPaint)
             }
         } finally {
             holder.unlockCanvasAndPost(canvas)
