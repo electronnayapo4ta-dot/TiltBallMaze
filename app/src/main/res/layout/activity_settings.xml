@@ -71,7 +71,7 @@
 
     <TextView
         android:id="@+id/tvVersion"
-        android:text="Version 1.0"
+        android:text="Version"
         android:textSize="16sp"
         android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
@@ -79,7 +79,7 @@
 
     <TextView
         android:id="@+id/tvReleaseDate"
-        android:text="Released: May 26, 2026"
+        android:text="Released: June 21, 2026"
         android:textSize="16sp"
         android:layout_marginTop="4dp"
         android:layout_width="wrap_content"

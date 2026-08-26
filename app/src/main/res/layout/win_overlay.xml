@@ -8,7 +8,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.yourcompany.tiltballmaze.game.ui.FireworksView
+    <com.densappstudio.tiltballmaze.game.ui.FireworksView
         android:id="@+id/fireworks"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

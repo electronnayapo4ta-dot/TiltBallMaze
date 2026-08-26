@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.yourcompany.tiltballmaze.game.engine.GameSurface
+    <com.densappstudio.tiltballmaze.game.engine.GameSurface
         android:id="@+id/gameSurface"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

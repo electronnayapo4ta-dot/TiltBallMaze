@@ -59,7 +59,7 @@ Install on a connected device (ADB required):
 
 ## Package / app id
 
-- `com.yourcompany.tiltballmaze`
+- `com.densappstudio.tiltballmaze`
 
 ## License
 
