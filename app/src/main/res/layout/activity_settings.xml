@@ -79,7 +79,7 @@
 
     <TextView
         android:id="@+id/tvReleaseDate"
-        android:text="Released: June 21, 2026"
+        android:text="@string/release_date"
         android:textSize="16sp"
         android:layout_marginTop="4dp"
         android:layout_width="wrap_content"
