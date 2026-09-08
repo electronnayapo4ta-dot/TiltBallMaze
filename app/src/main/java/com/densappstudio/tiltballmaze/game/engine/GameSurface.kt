@@ -9,6 +9,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.densappstudio.tiltballmaze.game.audio.SoundManager
 import com.densappstudio.tiltballmaze.game.data.GamePreferences
+import com.densappstudio.tiltballmaze.game.model.ArcObstacle
 import com.densappstudio.tiltballmaze.game.model.Ball
 import com.densappstudio.tiltballmaze.game.model.Hole
 import com.densappstudio.tiltballmaze.game.model.MovingObstacle
@@ -63,6 +64,12 @@ class GameSurface @JvmOverloads constructor(
     private val rotatingPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.CYAN
         style = Paint.Style.FILL
+    }
+
+    private val arcObstacles = mutableListOf<ArcObstacle>()
+    private val arcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.LTGRAY
+        style = Paint.Style.STROKE
     }
 
     private lateinit var hole: Hole
@@ -145,6 +152,7 @@ class GameSurface @JvmOverloads constructor(
         movingObstacles.clear()
         rotatingObstacles.clear()
         verticalPairs.clear()
+        arcObstacles.clear()
 
         when (levelId) {
             1 -> loadLevel1()
@@ -152,10 +160,53 @@ class GameSurface @JvmOverloads constructor(
             3 -> loadLevel3()
             4 -> loadLevel4()
             5 -> loadLevel5()
+            6 -> loadLevel6()
             else -> loadLevel1()
         }
 
         levelStartTime = System.currentTimeMillis()
+    }
+    
+    private fun loadLevel6() {
+        val speed = DevSettingsActivity.BASE_ROTATION_SPEED * DevSettingsActivity.level6RotationSpeedMultiplier(context)
+        val gearSize = widthF.coerceAtMost(heightF) * 0.7f
+        val thickness = ball.radius * 2.0f 
+
+        rotatingObstacles += RotatingObstacle(
+            centerX = widthF / 2f,
+            centerY = heightF / 2f,
+            width = gearSize,
+            height = thickness,
+            rotationSpeed = speed
+        )
+        rotatingObstacles += RotatingObstacle(
+            centerX = widthF / 2f,
+            centerY = heightF / 2f,
+            width = thickness,
+            height = gearSize,
+            rotationSpeed = speed
+        )
+
+        val arcRadius = gearSize / 2f + ball.radius * 2.5f
+        arcObstacles += ArcObstacle(
+            centerX = widthF / 2f,
+            centerY = heightF / 2f,
+            radius = arcRadius,
+            startAngle = 90f,
+            sweepAngle = 180f,
+            thickness = thickness
+        )
+
+        obstacles += Obstacle(
+            left = widthF / 2f + arcRadius - thickness / 2f,
+            top = heightF / 2f - gearSize / 2f,
+            right = widthF / 2f + arcRadius + thickness / 2f,
+            bottom = heightF / 2f + gearSize / 2f
+        )
+
+        ball.x = widthF * 0.5f
+        ball.y = heightF * 0.9f
+        hole = Hole(widthF * 0.5f, heightF * 0.1f, 50f)
     }
 
     private fun loadLevel1() {
@@ -334,6 +385,7 @@ class GameSurface @JvmOverloads constructor(
         handleRotatingObstacleCollisions()
         updateVerticalPairs(dt)
         handleVerticalPairCollisions()
+        handleArcObstacleCollisions()
 
         if (checkWin()) {
             isWin = true
@@ -388,6 +440,10 @@ class GameSurface @JvmOverloads constructor(
             val dist2 = dx * dx + dy * dy
 
             if (dist2 < ball.radius * ball.radius) {
+                if (levelId == 6) {
+                    triggerExplosion()
+                    return
+                }
                 val dist = sqrt(dist2.toDouble()).toFloat().coerceAtLeast(0.001f)
                 val overlap = ball.radius - dist
                 val nx = dx / dist
@@ -445,6 +501,10 @@ class GameSurface @JvmOverloads constructor(
             val dist2 = ldx * ldx + ldy * ldy
 
             if (dist2 < ball.radius * ball.radius) {
+                if (levelId == 6) {
+                    triggerExplosion()
+                    return
+                }
                 val dist = sqrt(dist2.toDouble()).toFloat().coerceAtLeast(0.001f)
                 val overlap = ball.radius - dist
                 val nxLocal = ldx / dist
@@ -515,6 +575,60 @@ class GameSurface @JvmOverloads constructor(
         }
     }
 
+    private fun handleArcObstacleCollisions() {
+        for (a in arcObstacles) {
+            val dx = ball.x - a.centerX
+            val dy = ball.y - a.centerY
+            val dist = sqrt(dx * dx + dy * dy)
+            
+            // Check radial range
+            val minR = a.radius - a.thickness / 2f - ball.radius
+            val maxR = a.radius + a.thickness / 2f + ball.radius
+            
+            if (dist in minR..maxR) {
+                // Check angular range
+                var angle = Math.toDegrees(Math.atan2(dy.toDouble(), dx.toDouble())).toFloat()
+                if (angle < 0) angle += 360f
+                
+                var start = a.startAngle
+                while (start < 0) start += 360f
+                while (start >= 360) start -= 360f
+                
+                val end = start + a.sweepAngle
+                val inRange = if (end < 360) {
+                    angle in start..end
+                } else {
+                    angle >= start || angle <= (end - 360)
+                }
+                
+                if (inRange) {
+                    val nx = dx / dist
+                    val ny = dy / dist
+                    
+                    // Push out
+                    val targetDist = if (dist > a.radius) a.radius + a.thickness / 2f + ball.radius 
+                                    else a.radius - a.thickness / 2f - ball.radius
+                    
+                    // Simpler: overlap with the centerline
+                    val distFromCenterline = Math.abs(dist - a.radius)
+                    val overlap = (a.thickness / 2f + ball.radius) - distFromCenterline
+                    
+                    val sign = if (dist > a.radius) 1f else -1f
+                    ball.x += nx * overlap * sign
+                    ball.y += ny * overlap * sign
+                    
+                    val vn = ball.vx * nx + ball.vy * ny
+                    if (vn * sign < 0f) {
+                        val bounce = 0.5f
+                        ball.vx -= (1f + bounce) * vn * nx
+                        ball.vy -= (1f + bounce) * vn * ny
+                        SoundManager.playCollision()
+                    }
+                }
+            }
+        }
+    }
+
     private fun rectCircleOverlap(cx: Float, cy: Float, r: Float, l: Float, t: Float, ri: Float, b: Float): Boolean {
         val closestX = cx.coerceIn(l, ri)
         val closestY = cy.coerceIn(t, b)
@@ -572,6 +686,10 @@ class GameSurface @JvmOverloads constructor(
             val dist2 = dx * dx + dy * dy
 
             if (dist2 < ball.radius * ball.radius) {
+                if (levelId == 6) {
+                    triggerExplosion()
+                    return
+                }
                 val dist = sqrt(dist2.toDouble()).toFloat().coerceAtLeast(0.001f)
                 val overlap = ball.radius - dist
                 val nx = dx / dist
@@ -605,8 +723,19 @@ class GameSurface @JvmOverloads constructor(
             for (r in rotatingObstacles) {
                 canvas.save()
                 canvas.rotate(r.angle, r.centerX, r.centerY)
-                canvas.drawRect(r.centerX - r.width / 2f, r.centerY - r.height / 2f, r.centerX + r.width / 2f, r.centerY + r.height / 2f, rotatingPaint)
+                val paint = if (levelId == 6) deadlyPaint else rotatingPaint
+                canvas.drawRect(r.centerX - r.width / 2f, r.centerY - r.height / 2f, r.centerX + r.width / 2f, r.centerY + r.height / 2f, paint)
                 canvas.restore()
+            }
+            for (a in arcObstacles) {
+                arcPaint.strokeWidth = a.thickness
+                val rect = android.graphics.RectF(
+                    a.centerX - a.radius,
+                    a.centerY - a.radius,
+                    a.centerX + a.radius,
+                    a.centerY + a.radius
+                )
+                canvas.drawArc(rect, a.startAngle, a.sweepAngle, false, arcPaint)
             }
             if (isExploding) {
                 explosionPaint.color = Color.rgb(255, (255 * (1 - explosionTimer)).toInt(), 0)
