@@ -15,6 +15,7 @@ import com.densappstudio.tiltballmaze.game.model.Hole
 import com.densappstudio.tiltballmaze.game.model.MovingObstacle
 import com.densappstudio.tiltballmaze.game.model.Obstacle
 import com.densappstudio.tiltballmaze.game.model.RotatingObstacle
+import com.densappstudio.tiltballmaze.game.model.SineWaveObstacle
 import com.densappstudio.tiltballmaze.game.model.VerticalPairObstacle
 import com.densappstudio.tiltballmaze.ui.dev.DevSettingsActivity
 import kotlin.math.cos
@@ -70,6 +71,13 @@ class GameSurface @JvmOverloads constructor(
     private val arcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.LTGRAY
         style = Paint.Style.STROKE
+    }
+
+    private val sineWaveObstacles = mutableListOf<SineWaveObstacle>()
+    private val sinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.RED
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
     }
 
     private lateinit var hole: Hole
@@ -153,6 +161,7 @@ class GameSurface @JvmOverloads constructor(
         rotatingObstacles.clear()
         verticalPairs.clear()
         arcObstacles.clear()
+        sineWaveObstacles.clear()
 
         when (levelId) {
             1 -> loadLevel1()
@@ -161,6 +170,7 @@ class GameSurface @JvmOverloads constructor(
             4 -> loadLevel4()
             5 -> loadLevel5()
             6 -> loadLevel6()
+            7 -> loadLevel7()
             else -> loadLevel1()
         }
 
@@ -203,6 +213,35 @@ class GameSurface @JvmOverloads constructor(
             right = widthF / 2f + arcRadius + thickness / 2f,
             bottom = heightF / 2f + gearSize / 2f
         )
+
+        ball.x = widthF * 0.5f
+        ball.y = heightF * 0.9f
+        hole = Hole(widthF * 0.5f, heightF * 0.1f, 50f)
+    }
+
+    private fun loadLevel7() {
+        val pathHeight = heightF * 0.7f
+        val startY = heightF * 0.85f - pathHeight
+        val endY = heightF * 0.85f
+        
+        val s = SineWaveObstacle(
+            centerX = widthF / 2f,
+            startY = startY,
+            endY = endY,
+            amplitude = widthF * 0.25f,
+            cycles = 2f,
+            gap = ball.radius * 10.5f,
+            thickness = 15f
+        )
+        sineWaveObstacles += s
+
+        // Block sides at the bottom
+        obstacles += Obstacle(0f, endY, widthF * 0.5f - s.gap * 0.6f, endY + 20f)
+        obstacles += Obstacle(widthF * 0.5f + s.gap * 0.6f, endY, widthF, endY + 20f)
+        
+        // Block sides at the top
+        obstacles += Obstacle(0f, startY - 20f, widthF * 0.5f - s.gap * 0.6f, startY)
+        obstacles += Obstacle(widthF * 0.5f + s.gap * 0.6f, startY - 20f, widthF, startY)
 
         ball.x = widthF * 0.5f
         ball.y = heightF * 0.9f
@@ -386,6 +425,7 @@ class GameSurface @JvmOverloads constructor(
         updateVerticalPairs(dt)
         handleVerticalPairCollisions()
         handleArcObstacleCollisions()
+        handleSineWaveCollisions()
 
         if (checkWin()) {
             isWin = true
@@ -629,6 +669,24 @@ class GameSurface @JvmOverloads constructor(
         }
     }
 
+    private fun handleSineWaveCollisions() {
+        for (s in sineWaveObstacles) {
+            if (ball.y < s.startY || ball.y > s.endY) continue
+            
+            val t = (ball.y - s.startY) / (s.endY - s.startY)
+            val waveX = s.centerX + s.amplitude * sin(t * 2 * Math.PI * s.cycles).toFloat()
+            
+            val leftWallX = waveX - s.gap / 2f
+            val rightWallX = waveX + s.gap / 2f
+            
+            // Check if ball touches red lines
+            if (ball.x - ball.radius < leftWallX || ball.x + ball.radius > rightWallX) {
+                triggerExplosion()
+                return
+            }
+        }
+    }
+
     private fun rectCircleOverlap(cx: Float, cy: Float, r: Float, l: Float, t: Float, ri: Float, b: Float): Boolean {
         val closestX = cx.coerceIn(l, ri)
         val closestY = cy.coerceIn(t, b)
@@ -736,6 +794,28 @@ class GameSurface @JvmOverloads constructor(
                     a.centerY + a.radius
                 )
                 canvas.drawArc(rect, a.startAngle, a.sweepAngle, false, arcPaint)
+            }
+            for (s in sineWaveObstacles) {
+                sinePaint.strokeWidth = s.thickness
+                val leftPath = android.graphics.Path()
+                val rightPath = android.graphics.Path()
+                
+                val steps = 100
+                for (i in 0..steps) {
+                    val currY = s.startY + (s.endY - s.startY) * (i.toFloat() / steps)
+                    val t = i.toFloat() / steps
+                    val waveX = s.centerX + s.amplitude * sin(t * 2 * Math.PI * s.cycles).toFloat()
+                    
+                    if (i == 0) {
+                        leftPath.moveTo(waveX - s.gap / 2f, currY)
+                        rightPath.moveTo(waveX + s.gap / 2f, currY)
+                    } else {
+                        leftPath.lineTo(waveX - s.gap / 2f, currY)
+                        rightPath.lineTo(waveX + s.gap / 2f, currY)
+                    }
+                }
+                canvas.drawPath(leftPath, sinePaint)
+                canvas.drawPath(rightPath, sinePaint)
             }
             if (isExploding) {
                 explosionPaint.color = Color.rgb(255, (255 * (1 - explosionTimer)).toInt(), 0)

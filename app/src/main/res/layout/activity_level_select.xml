@@ -66,5 +66,13 @@
             android:drawablePadding="12dp"
             android:gravity="center_vertical|start"
             android:layout_marginTop="16dp"/>
+
+        <Button
+            android:id="@+id/level7"
+            style="@style/LevelButton"
+            android:text="Level 7"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical|start"
+            android:layout_marginTop="16dp"/>
     </LinearLayout>
 </ScrollView>

@@ -25,6 +25,7 @@ class LevelSelectActivity : AppCompatActivity() {
         binding.level4.enablePressAnimations(this)
         binding.level5.enablePressAnimations(this)
         binding.level6.enablePressAnimations(this)
+        binding.level7.enablePressAnimations(this)
 
         binding.level1.setOnClickListenerWithBounce(this) { openLevel(1) }
         binding.level2.setOnClickListenerWithBounce(this) { openLevel(2) }
@@ -32,6 +33,7 @@ class LevelSelectActivity : AppCompatActivity() {
         binding.level4.setOnClickListenerWithBounce(this) { openLevel(4) }
         binding.level5.setOnClickListenerWithBounce(this) { openLevel(5) }
         binding.level6.setOnClickListenerWithBounce(this) { openLevel(6) }
+        binding.level7.setOnClickListenerWithBounce(this) { openLevel(7) }
     }
 
     override fun onResume() {
@@ -45,12 +47,14 @@ class LevelSelectActivity : AppCompatActivity() {
             binding.level4.isEnabled = GamePreferences.isLevelUnlocked(this, 4)
             binding.level5.isEnabled = GamePreferences.isLevelUnlocked(this, 5)
             binding.level6.isEnabled = GamePreferences.isLevelUnlocked(this, 6)
+            binding.level7.isEnabled = GamePreferences.isLevelUnlocked(this, 7)
         } else {
             binding.level2.isEnabled = true
             binding.level3.isEnabled = true
             binding.level4.isEnabled = true
             binding.level5.isEnabled = true
             binding.level6.isEnabled = true
+            binding.level7.isEnabled = true
         }
 
         updateLevelIcons()
@@ -63,6 +67,7 @@ class LevelSelectActivity : AppCompatActivity() {
         updateButtonIcon(binding.level4, 4)
         updateButtonIcon(binding.level5, 5)
         updateButtonIcon(binding.level6, 6)
+        updateButtonIcon(binding.level7, 7)
     }
 
     private fun updateButtonIcon(button: android.widget.Button, level: Int) {
