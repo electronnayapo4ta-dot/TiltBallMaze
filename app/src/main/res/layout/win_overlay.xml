@@ -23,7 +23,7 @@
 
         <TextView
             android:id="@+id/winText"
-            android:text="YOU WIN!"
+            android:text="@string/win_message"
             android:textSize="48sp"
             android:textColor="@android:color/white"
             android:fontFamily="@font/montserrat_bold"
@@ -34,12 +34,12 @@
         <Button
             android:id="@+id/btnRestart"
             style="@style/GameButton"
-            android:text="Restart" />
+            android:text="@string/win_restart" />
 
         <Button
             android:id="@+id/btnNextLevel"
             style="@style/GameButton"
-            android:text="Next Level"
+            android:text="@string/win_next_level"
             android:layout_marginTop="16dp" />
 
     </LinearLayout>

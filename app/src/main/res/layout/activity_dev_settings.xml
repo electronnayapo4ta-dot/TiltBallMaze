@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:text="Dev"
+        android:text="@string/dev_title"
         android:textSize="32sp"
         android:textColor="@color/menu_title"
         android:layout_marginBottom="32dp"
@@ -16,7 +16,7 @@
         android:layout_height="wrap_content" />
 
     <TextView
-        android:text="Level 5 — вертикальные шторки"
+        android:text="@string/dev_level_5_title"
         android:textSize="18sp"
         android:textColor="@color/menu_title"
         android:layout_marginBottom="16dp"
@@ -30,14 +30,14 @@
 
         <RadioButton
             android:id="@+id/speed02"
-            android:text="0.2 — очень медленно"
+            android:text="@string/dev_speed_very_slow"
             android:textSize="18sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <RadioButton
             android:id="@+id/speed05"
-            android:text="0.5 — медленнее"
+            android:text="@string/dev_speed_slower"
             android:textSize="18sp"
             android:layout_marginTop="12dp"
             android:layout_width="wrap_content"
@@ -45,7 +45,7 @@
 
         <RadioButton
             android:id="@+id/speed10"
-            android:text="1.0 — нормальная скорость"
+            android:text="@string/dev_speed_normal"
             android:textSize="18sp"
             android:layout_marginTop="12dp"
             android:layout_width="wrap_content"
@@ -53,7 +53,7 @@
 
         <RadioButton
             android:id="@+id/speed15"
-            android:text="1.5 — быстрее"
+            android:text="@string/dev_speed_faster"
             android:textSize="18sp"
             android:layout_marginTop="12dp"
             android:layout_width="wrap_content"
@@ -68,7 +68,7 @@
         android:layout_marginBottom="24dp"/>
 
     <TextView
-        android:text="Level 6 — вращающаяся шестерня"
+        android:text="@string/dev_level_6_title"
         android:textSize="18sp"
         android:textColor="@color/menu_title"
         android:layout_marginBottom="16dp"
@@ -82,14 +82,14 @@
 
         <RadioButton
             android:id="@+id/rotate02"
-            android:text="0.2 — очень медленно"
+            android:text="@string/dev_speed_very_slow"
             android:textSize="18sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <RadioButton
             android:id="@+id/rotate05"
-            android:text="0.5 — медленнее"
+            android:text="@string/dev_speed_slower"
             android:textSize="18sp"
             android:layout_marginTop="12dp"
             android:layout_width="wrap_content"
@@ -97,7 +97,7 @@
 
         <RadioButton
             android:id="@+id/rotate10"
-            android:text="1.0 — нормальная скорость"
+            android:text="@string/dev_speed_normal"
             android:textSize="18sp"
             android:layout_marginTop="12dp"
             android:layout_width="wrap_content"
@@ -105,7 +105,7 @@
 
         <RadioButton
             android:id="@+id/rotate15"
-            android:text="1.5 — быстрее"
+            android:text="@string/dev_speed_faster"
             android:textSize="18sp"
             android:layout_marginTop="12dp"
             android:layout_width="wrap_content"

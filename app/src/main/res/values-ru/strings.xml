@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Tiltballmaze</string>
+    <string name="release_date">Выпущено: 23 июня 2026 г.</string>
+    <string name="menu_play">Играть</string>
+    <string name="menu_settings">Настройки</string>
+    <string name="menu_exit">Выход</string>
+    <string name="settings_title">Настройки</string>
+    <string name="settings_sound">Звук</string>
+    <string name="settings_track_progression">Прогресс уровней</string>
+    <string name="settings_track_timer">Таймер / Рекорды</string>
+    <string name="settings_support">❤️ Поддержать разработчика</string>
+    <string name="settings_about">О программе</string>
+    <string name="settings_version">Версия %s</string>
+    <string name="settings_feedback">Обратная связь: AVG.LOGIN@yandex.ru</string>
+    <string name="support_title">Поддержать разработчика</string>
+    <string name="support_description">Игра Tilt Ball Maze создана с любовью и преданностью делу. Если вам нравится игра, вы можете поддержать её дальнейшую разработку.</string>
+    <string name="support_option_1">☕ Купить кофе — $1</string>
+    <string name="support_option_2">💛 Поддержать — $3</string>
+    <string name="support_option_3">🚀 Супер поддержка — $5</string>
+    <string name="level_select_title">Выбор уровня</string>
+    <string name="level_name">Уровень %d</string>
+    <string name="win_message">ПОБЕДА!</string>
+    <string name="win_restart">Заново</string>
+    <string name="win_next_level">След. уровень</string>
+    <string name="dev_title">Dev</string>
+    <string name="dev_level_5_title">Уровень 5 — вертикальные шторки</string>
+    <string name="dev_level_6_title">Уровень 6 — вращающаяся шестерня</string>
+    <string name="dev_speed_very_slow">0.2 — очень медленно</string>
+    <string name="dev_speed_slower">0.5 — медленнее</string>
+    <string name="dev_speed_normal">1.0 — нормальная скорость</string>
+    <string name="dev_speed_faster">1.5 — быстрее</string>
+    <string name="language_select">Язык</string>
+    <string name="lang_english">English</string>
+    <string name="lang_russian">Русский</string>
+</resources>

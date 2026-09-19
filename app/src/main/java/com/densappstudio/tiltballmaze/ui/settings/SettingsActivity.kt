@@ -7,10 +7,13 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.densappstudio.tiltballmaze.R
 import com.densappstudio.tiltballmaze.databinding.ActivitySettingsBinding
 import com.densappstudio.tiltballmaze.game.audio.SoundManager
 import com.densappstudio.tiltballmaze.game.data.GamePreferences
 import com.densappstudio.tiltballmaze.ui.support.SupportActivity
+import com.densappstudio.tiltballmaze.ui.util.LocaleHelper
+import java.util.Locale
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -46,6 +49,21 @@ class SettingsActivity : AppCompatActivity() {
             GamePreferences.setTrackTimer(this, isChecked)
         }
 
+        val currentLang = LocaleHelper.getLanguage(this)
+        if (currentLang == "ru") {
+            binding.langRu.isChecked = true
+        } else {
+            binding.langEn.isChecked = true
+        }
+
+        binding.radioLanguage.setOnCheckedChangeListener { _, checkedId ->
+            val lang = if (checkedId == R.id.langRu) "ru" else "en"
+            if (lang != currentLang) {
+                prefs.edit().putString("language", lang).apply()
+                LocaleHelper.setLocale(lang)
+            }
+        }
+
         binding.btnSupport.setOnClickListener {
             startActivity(Intent(this, SupportActivity::class.java))
         }
@@ -53,7 +71,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.tvEmail.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
                 data = Uri.parse("mailto:AVG.LOGIN@yandex.ru")
-                putExtra(Intent.EXTRA_SUBJECT, "Tilt Ball Maze Feedback")
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.settings_feedback))
             }
             try {
                 startActivity(intent)
@@ -69,7 +87,7 @@ class SettingsActivity : AppCompatActivity() {
                 @Suppress("DEPRECATION")
                 packageManager.getPackageInfo(packageName, 0)
             }
-            binding.tvVersion.text = "Version ${packageInfo.versionName}"
+            binding.tvVersion.text = getString(R.string.settings_version, packageInfo.versionName)
         } catch (e: Exception) {
             binding.tvVersion.text = "Version unknown"
         }

@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import com.densappstudio.tiltballmaze.R
 import com.densappstudio.tiltballmaze.game.audio.SoundManager
 import com.densappstudio.tiltballmaze.game.data.GamePreferences
 import com.densappstudio.tiltballmaze.game.model.ArcObstacle
@@ -823,7 +824,7 @@ class GameSurface @JvmOverloads constructor(
             } else {
                 canvas.drawCircle(ball.x, ball.y, ball.radius, ballPaint)
             }
-            if (isWin) canvas.drawText("YOU WIN!", widthF / 2f, heightF / 2f, winTextPaint)
+            if (isWin) canvas.drawText(context.getString(R.string.win_message), widthF / 2f, heightF / 2f, winTextPaint)
             if (!isWin && GamePreferences.isTrackTimer(context)) {
                 val elapsed = System.currentTimeMillis() - levelStartTime
                 canvas.drawText("${elapsed / 1000f}s", 50f, 200f, timerPaint)

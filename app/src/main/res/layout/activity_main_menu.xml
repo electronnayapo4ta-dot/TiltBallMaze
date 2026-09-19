@@ -16,7 +16,7 @@
         android:layout_marginBottom="16dp" />
 
     <TextView
-        android:text="Tilt Ball Maze"
+        android:text="@string/app_name"
         android:textSize="28sp"
         android:textColor="@color/menu_title"
         android:fontFamily="@font/montserrat_bold"
@@ -27,18 +27,18 @@
     <Button
         android:id="@+id/btnPlay"
         style="@style/GameButton"
-        android:text="Play"/>
+        android:text="@string/menu_play"/>
 
     <Button
         android:id="@+id/btnSettings"
         style="@style/GameButton"
-        android:text="Settings"
+        android:text="@string/menu_settings"
         android:layout_marginTop="24dp"/>
 
     <Button
         android:id="@+id/btnExit"
         style="@style/GameButton"
-        android:text="Exit"
+        android:text="@string/menu_exit"
         android:layout_marginTop="24dp"/>
 
 </LinearLayout>

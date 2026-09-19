@@ -3,6 +3,7 @@ package com.densappstudio.tiltballmaze.ui.levels
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.densappstudio.tiltballmaze.R
 import com.densappstudio.tiltballmaze.databinding.ActivityLevelSelectBinding
 import com.densappstudio.tiltballmaze.game.data.GamePreferences
 import com.densappstudio.tiltballmaze.game.ui.GameActivity
@@ -19,21 +20,21 @@ class LevelSelectActivity : AppCompatActivity() {
         binding = ActivityLevelSelectBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.level1.enablePressAnimations(this)
-        binding.level2.enablePressAnimations(this)
-        binding.level3.enablePressAnimations(this)
-        binding.level4.enablePressAnimations(this)
-        binding.level5.enablePressAnimations(this)
-        binding.level6.enablePressAnimations(this)
-        binding.level7.enablePressAnimations(this)
+        setupLevelButtons()
+    }
 
-        binding.level1.setOnClickListenerWithBounce(this) { openLevel(1) }
-        binding.level2.setOnClickListenerWithBounce(this) { openLevel(2) }
-        binding.level3.setOnClickListenerWithBounce(this) { openLevel(3) }
-        binding.level4.setOnClickListenerWithBounce(this) { openLevel(4) }
-        binding.level5.setOnClickListenerWithBounce(this) { openLevel(5) }
-        binding.level6.setOnClickListenerWithBounce(this) { openLevel(6) }
-        binding.level7.setOnClickListenerWithBounce(this) { openLevel(7) }
+    private fun setupLevelButtons() {
+        val buttons = listOf(
+            binding.level1, binding.level2, binding.level3,
+            binding.level4, binding.level5, binding.level6, binding.level7
+        )
+
+        buttons.forEachIndexed { index, button ->
+            val level = index + 1
+            button.text = getString(R.string.level_name, level)
+            button.enablePressAnimations(this)
+            button.setOnClickListenerWithBounce(this) { openLevel(level) }
+        }
     }
 
     override fun onResume() {
