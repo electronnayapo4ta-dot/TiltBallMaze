@@ -26,7 +26,8 @@ class LevelSelectActivity : AppCompatActivity() {
     private fun setupLevelButtons() {
         val buttons = listOf(
             binding.level1, binding.level2, binding.level3,
-            binding.level4, binding.level5, binding.level6, binding.level7
+            binding.level4, binding.level5, binding.level6,
+            binding.level7, binding.level8
         )
 
         buttons.forEachIndexed { index, button ->
@@ -49,6 +50,7 @@ class LevelSelectActivity : AppCompatActivity() {
             binding.level5.isEnabled = GamePreferences.isLevelUnlocked(this, 5)
             binding.level6.isEnabled = GamePreferences.isLevelUnlocked(this, 6)
             binding.level7.isEnabled = GamePreferences.isLevelUnlocked(this, 7)
+            binding.level8.isEnabled = GamePreferences.isLevelUnlocked(this, 8)
         } else {
             binding.level2.isEnabled = true
             binding.level3.isEnabled = true
@@ -56,6 +58,7 @@ class LevelSelectActivity : AppCompatActivity() {
             binding.level5.isEnabled = true
             binding.level6.isEnabled = true
             binding.level7.isEnabled = true
+            binding.level8.isEnabled = true
         }
 
         updateLevelIcons()
@@ -69,6 +72,7 @@ class LevelSelectActivity : AppCompatActivity() {
         updateButtonIcon(binding.level5, 5)
         updateButtonIcon(binding.level6, 6)
         updateButtonIcon(binding.level7, 7)
+        updateButtonIcon(binding.level8, 8)
     }
 
     private fun updateButtonIcon(button: android.widget.Button, level: Int) {

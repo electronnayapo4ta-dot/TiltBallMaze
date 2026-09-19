@@ -17,6 +17,7 @@ import com.densappstudio.tiltballmaze.game.model.MovingObstacle
 import com.densappstudio.tiltballmaze.game.model.Obstacle
 import com.densappstudio.tiltballmaze.game.model.RotatingObstacle
 import com.densappstudio.tiltballmaze.game.model.SineWaveObstacle
+import com.densappstudio.tiltballmaze.game.model.SpiralObstacle
 import com.densappstudio.tiltballmaze.game.model.VerticalPairObstacle
 import com.densappstudio.tiltballmaze.ui.dev.DevSettingsActivity
 import kotlin.math.cos
@@ -81,17 +82,17 @@ class GameSurface @JvmOverloads constructor(
         strokeCap = Paint.Cap.ROUND
     }
 
+    private val spiralObstacles = mutableListOf<SpiralObstacle>()
+    private val spiralPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.RED
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+    }
+
     private lateinit var hole: Hole
     private val holePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.GREEN
         style = Paint.Style.FILL
-    }
-
-    private val winTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.YELLOW
-        textSize = 120f
-        textAlign = Paint.Align.CENTER
-        setShadowLayer(10f, 0f, 0f, Color.BLACK)
     }
 
     private val explosionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -163,6 +164,7 @@ class GameSurface @JvmOverloads constructor(
         verticalPairs.clear()
         arcObstacles.clear()
         sineWaveObstacles.clear()
+        spiralObstacles.clear()
 
         when (levelId) {
             1 -> loadLevel1()
@@ -172,6 +174,7 @@ class GameSurface @JvmOverloads constructor(
             5 -> loadLevel5()
             6 -> loadLevel6()
             7 -> loadLevel7()
+            8 -> loadLevel8()
             else -> loadLevel1()
         }
 
@@ -220,6 +223,25 @@ class GameSurface @JvmOverloads constructor(
         hole = Hole(widthF * 0.5f, heightF * 0.1f, 50f)
     }
 
+    private fun loadLevel8() {
+        val centerX = widthF / 2f
+        val centerY = heightF / 2f
+        hole = Hole(centerX, centerY, 50f)
+
+        spiralObstacles += SpiralObstacle(
+            centerX = centerX,
+            centerY = centerY,
+            startRadius = 100f,
+            endRadius = widthF * 0.65f,
+            numTurns = 3.5f,
+            rotationSpeed = 30f, // Slow rotation
+            thickness = 15f
+        )
+
+        ball.x = widthF * 0.5f
+        ball.y = heightF * 0.95f
+    }
+
     private fun loadLevel7() {
         val pathHeight = heightF * 0.7f
         val startY = heightF * 0.85f - pathHeight
@@ -231,7 +253,7 @@ class GameSurface @JvmOverloads constructor(
             endY = endY,
             amplitude = widthF * 0.25f,
             cycles = 2f,
-            gap = ball.radius * 10.5f,
+            gap = ball.radius * 7.6f,
             thickness = 15f
         )
         sineWaveObstacles += s
@@ -427,6 +449,8 @@ class GameSurface @JvmOverloads constructor(
         handleVerticalPairCollisions()
         handleArcObstacleCollisions()
         handleSineWaveCollisions()
+        updateSpiralObstacles(dt)
+        handleSpiralCollisions()
 
         if (checkWin()) {
             isWin = true
@@ -688,6 +712,50 @@ class GameSurface @JvmOverloads constructor(
         }
     }
 
+    private fun updateSpiralObstacles(dt: Float) {
+        for (s in spiralObstacles) {
+            // Stop rotation when ball reaches halfway along Y from outer turn to center
+            val stopYThreshold = s.centerY + s.endRadius / 2f
+            if (ball.y > stopYThreshold) {
+                s.rotationAngle += s.rotationSpeed * dt
+                if (s.rotationAngle >= 360f) s.rotationAngle -= 360f
+            }
+        }
+    }
+
+    private fun handleSpiralCollisions() {
+        for (s in spiralObstacles) {
+            val dx = ball.x - s.centerX
+            val dy = ball.y - s.centerY
+            val dist = sqrt(dx * dx + dy * dy)
+            
+            if (dist < s.startRadius - ball.radius || dist > s.endRadius + ball.radius) continue
+
+            var angle = Math.toDegrees(Math.atan2(dy.toDouble(), dx.toDouble())).toFloat()
+            if (angle < 0) angle += 360f
+            
+            // Adjust angle by spiral rotation
+            var adjustedAngle = angle - s.rotationAngle
+            while (adjustedAngle < 0) adjustedAngle += 360f
+            
+            // The spiral formula: r = a + b * totalAngle
+            val a = s.startRadius
+            val b = (s.endRadius - s.startRadius) / (s.numTurns * 360f)
+            
+            // Check each turn
+            for (turn in 0..s.numTurns.toInt() + 1) {
+                val totalAngle = adjustedAngle + turn * 360f
+                if (totalAngle > s.numTurns * 360f) continue
+                
+                val rExpected = a + b * totalAngle
+                if (Math.abs(dist - rExpected) < (s.thickness / 2f + ball.radius)) {
+                    triggerExplosion()
+                    return
+                }
+            }
+        }
+    }
+
     private fun rectCircleOverlap(cx: Float, cy: Float, r: Float, l: Float, t: Float, ri: Float, b: Float): Boolean {
         val closestX = cx.coerceIn(l, ri)
         val closestY = cy.coerceIn(t, b)
@@ -818,13 +886,30 @@ class GameSurface @JvmOverloads constructor(
                 canvas.drawPath(leftPath, sinePaint)
                 canvas.drawPath(rightPath, sinePaint)
             }
+            for (s in spiralObstacles) {
+                spiralPaint.strokeWidth = s.thickness
+                val path = android.graphics.Path()
+                val steps = 200
+                val totalDegrees = s.numTurns * 360f
+                val a = s.startRadius
+                val b = (s.endRadius - s.startRadius) / totalDegrees
+                
+                for (i in 0..steps) {
+                    val deg = (totalDegrees * i) / steps
+                    val rad = Math.toRadians((deg + s.rotationAngle).toDouble())
+                    val r = a + b * deg
+                    val px = s.centerX + r * cos(rad).toFloat()
+                    val py = s.centerY + r * sin(rad).toFloat()
+                    if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
+                }
+                canvas.drawPath(path, spiralPaint)
+            }
             if (isExploding) {
                 explosionPaint.color = Color.rgb(255, (255 * (1 - explosionTimer)).toInt(), 0)
                 canvas.drawCircle(ball.x, ball.y, ball.radius * (1 + explosionTimer * 3), explosionPaint)
             } else {
                 canvas.drawCircle(ball.x, ball.y, ball.radius, ballPaint)
             }
-            if (isWin) canvas.drawText(context.getString(R.string.win_message), widthF / 2f, heightF / 2f, winTextPaint)
             if (!isWin && GamePreferences.isTrackTimer(context)) {
                 val elapsed = System.currentTimeMillis() - levelStartTime
                 canvas.drawText("${elapsed / 1000f}s", 50f, 200f, timerPaint)

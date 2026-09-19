@@ -95,6 +95,6 @@ class GameActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val MAX_LEVEL = 7
+        private const val MAX_LEVEL = 8
     }
 }
